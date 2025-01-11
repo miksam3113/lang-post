@@ -29,7 +29,8 @@ bot.on("message", async (ctx) => {
       ctx.message.forward_from_chat !== undefined &&
       botState.message !== ""
     ) {
-      return ctx.reply(botState.message);
+      console.log(botState.message)
+      return ctx.replyWithMarkdownV2(botState.message);
     }
 
     if (
@@ -47,7 +48,14 @@ bot.on("message", async (ctx) => {
       ctx.message.text !== "/post"
     ) {
       botState.isActive = true;
-      botState.message = textMessage;
+      console.log(ctx.message);
+      let state = ``;
+      if(ctx.message.link_preview_options !== undefined) {
+        state = `[${textMessage}](${ctx.message.link_preview_options.url})`;
+      } else {
+        state = textMessage;
+      }
+      botState.message = state;
       return ctx.reply(
         "Good, this text will be used for the Ukrainian translate of the next post",
         {
