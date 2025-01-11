@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const { BOT_TOKEN, CHANNEL_ID } = process.env;
+const { BOT_TOKEN } = process.env;
 const bot = new Telegraf(BOT_TOKEN);
 
 const botState = {
@@ -26,7 +26,7 @@ bot.on("message", async (ctx) => {
   try {
     if (
       ctx.message.chat.type !== "private" &&
-      ctx.message.forward_from_chat.id.toString() === CHANNEL_ID &&
+      ctx.message.forward_from_chat !== undefined &&
       botState.message !== ""
     ) {
       return ctx.reply(botState.message);
