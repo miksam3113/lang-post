@@ -48,11 +48,12 @@ bot.on("message", async (ctx) => {
       botState.isActive = true;
 
       const regExp = /([*_~`>#+\-=|{}.!\\[\]()])/g;
+      const entities = ctx.message.entities || [];
       let stateMessage = '';
 
       let indexMessage = 0;
 
-      ctx.message.entities.forEach(entity => {
+      entities.forEach(entity => {
         if (entity.offset > indexMessage) {
           stateMessage += ctx.message.text.slice(indexMessage, entity.offset).replace(regExp, '\\$1');
         }
