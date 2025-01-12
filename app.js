@@ -21,7 +21,6 @@ bot.hears("/post", async (ctx) => {
 });
 
 bot.on("message", async (ctx) => {
-  const textMessage = ctx.message.text;
 
   try {
     if (
@@ -29,7 +28,6 @@ bot.on("message", async (ctx) => {
       ctx.message.forward_from_chat !== undefined &&
       botState.message !== ""
     ) {
-      console.log(botState.message)
       return ctx.replyWithMarkdownV2(botState.message);
     }
 
@@ -48,14 +46,60 @@ bot.on("message", async (ctx) => {
       ctx.message.text !== "/post"
     ) {
       botState.isActive = true;
-      console.log(ctx.message);
-      let state = ``;
-      if(ctx.message.link_preview_options !== undefined) {
-        state = `[${textMessage}](${ctx.message.link_preview_options.url})`;
-      } else {
-        state = textMessage;
+
+      const regExp = /([*_~`>#+\-=|{}.!\\[\]()])/g;
+      let stateMessage = '';
+
+      let indexMessage = 0;
+
+      ctx.message.entities.forEach(entity => {
+        if (entity.offset > indexMessage) {
+          stateMessage += ctx.message.text.slice(indexMessage, entity.offset).replace(regExp, '\\$1');
+        }
+
+        const entityText = ctx.message.text.substr(entity.offset, entity.length);
+
+        switch (entity.type) {
+          case 'bold':
+            stateMessage += `*${entityText}*`;
+            break;
+          case 'italic':
+            stateMessage += `_${entityText}_`;
+            break;
+          case 'underline':
+            stateMessage += `__${entityText}__`;
+            break;
+          case 'strikethrough':
+            stateMessage += `~${entityText}~`;
+            break;
+          case 'code':
+            stateMessage += `\`${entityText}\``;
+            break;
+          case 'pre':
+            stateMessage += `\`\`\`\n${entityText}\n\`\`\``;
+            break;
+          case 'text_link':
+            stateMessage += `[${entityText}](${entity.url})`;
+            break;
+          case 'text_mention':
+            stateMessage += `[${entityText}](tg://user?id=${entity.user.id})`;
+            break;
+          case 'email':
+            stateMessage += entityText.replace(regExp, '\\$1');
+            break;
+          default:
+            stateMessage += entityText.replace(regExp, '\\$1');;
+            break;
+        }
+
+        indexMessage = entity.offset + entity.length;
+      });
+
+      if (indexMessage < ctx.message.text.length) {
+        stateMessage += ctx.message.text.slice(indexMessage).replace(regExp, '\\$1');
       }
-      botState.message = state;
+
+      botState.message = stateMessage;
       return ctx.reply(
         "Good, this text will be used for the Ukrainian translate of the next post",
         {
