@@ -50,7 +50,6 @@ bot.on("message", async (ctx) => {
       const regExp = /([*_~`>#+\-=|{}.!\\[\]()])/g;
       const entities = ctx.message.entities || [];
       let stateMessage = '';
-
       let indexMessage = 0;
 
       entities.forEach(entity => {
@@ -58,7 +57,7 @@ bot.on("message", async (ctx) => {
           stateMessage += ctx.message.text.slice(indexMessage, entity.offset).replace(regExp, '\\$1');
         }
 
-        const entityText = ctx.message.text.substr(entity.offset, entity.length);
+        const entityText = ctx.message.text.substr(entity.offset, entity.length).replace(regExp, '\\$1');
 
         switch (entity.type) {
           case 'bold':
